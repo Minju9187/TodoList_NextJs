@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dummyTodos from "@/data/dummy.json";
-import { fetchTodos } from "@/data/firestore";
+import { fetchTodos, addATodo } from "@/data/firestore";
 
 /// 모든 할일 가져오기
 export async function GET(request: NextRequest) {
@@ -18,13 +18,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const { title } = await request.json();
 
-  const newTodo = {
-    id: "10",
-    title,
-    is_done: false,
-  };
+  const addedTodo = await addATodo({ title });
 
-  const response = { message: "할일 추가 성공!", data: newTodo };
+  const response = { message: "할일 추가 성공!", data: addedTodo };
 
   return NextResponse.json(response, { status: 201 });
 }

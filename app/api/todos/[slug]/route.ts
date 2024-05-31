@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
+import { fetchATodo } from "@/data/firestore";
 //할일 단일 조회
 export async function GET(
   request: NextRequest,
@@ -13,15 +13,15 @@ export async function GET(
   // URL -> `/dashboard?search=my-project`
   // `search` -> 'my-project'
 
+  const fetchedTodo = await fetchATodo(params.slug);
+
+  if (fetchedTodo === null) {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const response = {
     message: "단일 할일 가져오기 성공",
-    data: {
-      id: params.slug,
-      title: "오늘도 빡코딩!",
-      is_done: false,
-      //   query: search,
-      query,
-    },
+    data: fetchedTodo,
   };
 
   return NextResponse.json(response, { status: 200 });

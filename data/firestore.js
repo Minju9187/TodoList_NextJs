@@ -1,6 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -36,9 +44,57 @@ export async function fetchTodos() {
       id: doc.id,
       title: doc.data()["title"],
       is_done: doc.data()["is_done"],
-      created_at: doc.data()["created_at"],
+      created_at: doc.data()["created_at"].toDate(),
     };
+    // .toLocaleTimeString("ko")
     fetchedTodos.push(aTodo);
   });
   return fetchedTodos;
+}
+
+//할일 추가하기
+export async function addATodo({ title }) {
+  // Add a new document with a generated id
+  const newTodoRef = doc(collection(db, "todos"));
+
+  const createdTimestamp = Timestamp.fromDate(new Date());
+
+  const newTodoData = {
+    id: newTodoRef.id,
+    title: title,
+    is_done: false,
+    created_at: createdTimestamp,
+  };
+
+  // later...
+  await setDoc(newTodoRef, newTodoData);
+
+  return newTodoData;
+}
+
+//단일 할일 조회
+export async function fetchATodo(id) {
+  if (id === null) {
+    return null;
+  }
+
+  const todoDocRef = doc(db, "todos", id);
+  const todoDocSnap = await getDoc(todoDocRef);
+
+  if (todoDocSnap.exists()) {
+    console.log("Document data:", todoDocSnap.data());
+
+    const fetchedTodo = {
+      id: todoDocSnap.id,
+      title: todoDocSnap.data()["title"],
+      is_done: todoDocSnap.data()["is_done"],
+      created_at: todoDocSnap.data()["created_at"].toDate(),
+    };
+
+    return fetchedTodo;
+  } else {
+    // docSnap.data() will be undefined in this case
+    console.log("No such document!");
+    return null;
+  }
 }
